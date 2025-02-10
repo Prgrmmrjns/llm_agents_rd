@@ -13,7 +13,6 @@ from typing import List, Dict, Any, Set
 from dataclasses import dataclass
 import numpy as np
 from dotenv import load_dotenv
-from supabase import create_client
 from openai import OpenAI
 from dataclasses import dataclass
 

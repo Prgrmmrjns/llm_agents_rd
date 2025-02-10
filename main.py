@@ -1,9 +1,6 @@
 import pandas as pd
 import json
 import numpy as np
-from dotenv import load_dotenv
-from openai import OpenAI
-import os
 from typing import List, Dict
 import asyncio
 from pathlib import Path
@@ -20,12 +17,6 @@ from rag import (
     process_search_results,
     get_embedding
 )
-
-# Load environment variables
-load_dotenv()
-
-# Initialize OpenAI client
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 async def build_question_specific_rag(query: str, disease: str, options: Dict[str, str]) -> List[str]:
     """

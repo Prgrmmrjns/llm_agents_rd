@@ -1,28 +1,159 @@
-from ollama import chat
 import json
 from openai import OpenAI
-import os
-from dotenv import load_dotenv
-from lmstudio_basemodel import get_schema
 
-load_dotenv()
-
-os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
-
-ollama_model =  'deepseek-r1:32b' #'phi4:latest' #'deepseek-r1:14b' #
-openai_model = 'o3-mini'
 lmstudio_model = 'mistral-small-24b-instruct-2501'
-api = 'lmstudio'
 
-# Initialize clients
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-lmstudio_client = OpenAI(
+client = OpenAI(
     base_url="http://localhost:1234/v1",
     api_key="lm-studio"
 )
 
 API_TYPE = 'lmstudio'
 MODEL_NAME = 'mistral-small-24b-instruct-2501'
+
+def get_schema(schema_name: str):
+    """Get the appropriate schema based on schema name and API type."""
+    schema_map = {
+        "answer": get_answer_schema(),
+        "research": get_research_schema(),
+        "search": get_search_schema(),
+        "reformulated_options": get_reformulated_options_schema()
+    }
+    
+    return schema_map.get(schema_name)
+
+def get_search_schema():
+    return {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "search",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "keywords_by_option": {
+                        "type": "object",
+                        "description": "Keywords that could help prove or disprove each option",
+                        "properties": {
+                            "A": {"type": "array", "items": {"type": "string"}},
+                            "B": {"type": "array", "items": {"type": "string"}},
+                            "C": {"type": "array", "items": {"type": "string"}},
+                            "D": {"type": "array", "items": {"type": "string"}}
+                        },
+                        "required": ["A", "B", "C", "D"]
+                    },
+                    "general_keywords": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "General keywords relevant to the overall question"
+                    },
+                    "temporal_keywords": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Time-related keywords (e.g., early onset, late stage)"
+                    },
+                    "demographic_keywords": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Age, gender, or population-related keywords"
+                    }
+                },
+                "required": ["keywords_by_option", "general_keywords"]
+            }
+        }
+    }
+
+def get_answer_schema():
+    return {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "answer",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "chosen_answer": {
+                        "type": "string",
+                        "enum": ["A", "B", "C", "D"],
+                        "description": "The letter of the chosen answer (A/B/C/D)"
+                    },
+                    "explanation": {
+                        "type": "string",
+                        "description": "Detailed explanation of why this answer was chosen or why more information is needed"
+                    }
+                },
+                "required": ["chosen_answer", "explanation"]
+            }
+        }
+    }
+
+def get_research_schema():
+    return {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "research",
+            "schema": {
+                "type": "object",
+                "properties": {     
+                    "evidence_by_option": {
+                        "type": "object",
+                        "description": "Evidence supporting each answer option",
+                        "properties": {
+                            "A": {"type": "string"},
+                            "B": {"type": "string"},
+                            "C": {"type": "string"},
+                            "D": {"type": "string"}
+                        },
+                        "required": ["A", "B", "C", "D"]
+                    },
+                    "counter_evidence_by_option": {
+                        "type": "object",
+                        "description": "Evidence contradicting each answer option",
+                        "properties": {
+                            "A": {"type": "string"},
+                            "B": {"type": "string"},
+                            "C": {"type": "string"},
+                            "D": {"type": "string"}
+                        },
+                        "required": ["A", "B", "C", "D"]
+                    },
+                    "accumulated_evidence": {
+                        "type": "string",
+                        "description": "Accumulated evidence from previous chunks that remains relevant"
+                    }
+                },
+                "required": ["evidence_by_option", "counter_evidence_by_option", "accumulated_evidence"]
+            }
+        }
+    }
+    
+def get_reformulated_options_schema():
+    return {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "reformulated_options",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "a": {
+                        "type": "string",
+                        "description": "Reformulated option A for the question"
+                    },
+                    "b": {
+                        "type": "string",
+                        "description": "Reformulated option B for the question"
+                    },
+                    "c": {
+                        "type": "string",
+                        "description": "Reformulated option C for the question"
+                    },
+                    "d": {
+                        "type": "string",
+                        "description": "Reformulated option D for the question"
+                    }
+                },
+                "required": ["a", "b", "c", "d"]
+            }
+        }
+    }
 
 def llm_chat(prompt: str, schema_name: str):
     """
@@ -32,34 +163,13 @@ def llm_chat(prompt: str, schema_name: str):
         prompt: The prompt to send to the LLM
         schema_name: The name of the schema to use for structured output
     """
-    client = openai_client if API_TYPE == "openai" else lmstudio_client
     
     # Get the appropriate schema based on API type
     schema = get_schema(schema_name)
     
-    if API_TYPE == "openai":
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=[{"role": "user", "content": prompt}],
-            response_format={"type": "json_object"}
-        )
-        return json.loads(response.choices[0].message.content)
-    else:  # lmstudio
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=[{"role": "user", "content": prompt}],
-            response_format=schema
-        )
-        return json.loads(response.choices[0].message.content)
-
-def set_api_type(api_type: str):
-    """Set the API type to use (openai or lmstudio)"""
-    global API_TYPE
-    if api_type not in ["openai", "lmstudio"]:
-        raise ValueError("API type must be either 'openai' or 'lmstudio'")
-    API_TYPE = api_type
-
-def set_model_name(model_name: str):
-    """Set the model name to use"""
-    global MODEL_NAME
-    MODEL_NAME = model_name
+    response = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[{"role": "user", "content": prompt}],
+        response_format=schema
+    )
+    return json.loads(response.choices[0].message.content)
