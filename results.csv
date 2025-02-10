@@ -1,0 +1,36 @@
+question,llm_answer,correct_answer,rationale,num_chunks_analyzed,total_chunks,index
+"Question: All are features of Abetalipoproteinemia, EXCEPT:
+Choices:
+A. Plasma levels of cholesterol and triglyceride are extremely low
+B. Manifest in early childhood with diarrhea
+C. Progressive pigmented retinopathy seen
+D. Neurological manifestation as ataxia in first decade
+Answer:",B,D,"The evidence provided describes several features of Abetalipoproteinemia, including progressive pigmented retinopathy and neurological manifestations such as ataxia typically beginning in the first or second decade of life. However, there is no mention of 'Manifest in early childhood with diarrhea'. Therefore, option B is likely the correct answer for the question that asks for the feature that is NOT associated with Abetalipoproteinemia. Source URL: https://www.ncbi.nlm.nih.gov/books/NBK532447/",4,10,0
+"Question: Abetalipoproteinemia is due to deficiency of -
+Choices:
+A. Lecithin Cholesterol Acyl Transferase
+B. ATP Binding Cassette Transporter-1
+C. Mitochondrial Triglyceride Transfer Protein
+D. ApoCII
+Answer:",C,C,"The evidence provided states that Abetalipoproteinemia is caused by a mutation in the MTP gene (Mitochondrial Triglyceride Transfer Protein). Therefore, the correct answer is C.",1,10,1
+"Question: Small intestinal biopsy is diagnostic in :a) Whipple's diseaseb) Abetalipoproteinemiac) Celiac diseased) Agammaglobulinemia
+Choices:
+A. acd
+B. bcd
+C. abd
+D. ab
+Answer:",C,C,"The evidence provided clearly states that small intestinal biopsy is diagnostic for Abetalipoproteinemia (b). The question asks which option is not true regarding small intestinal biopsies being diagnostic. Therefore, we need to select the answer choice that does NOT include 'b'. Options A and D include 'b', so they are eliminated. Option B includes both 'b' and 'c', leaving us with Option C as it includes 'a' and 'd', but not 'b'.",1,10,2
+"Question: Intermittent dysphagia is caused by -a) Strictureb) Reflux esophagitisc) Achalasia cardiad) Pharyngeal diverticululame) Diffuse esophageal spasm
+Choices:
+A. ab
+B. bc
+C. de
+D. bd
+Answer:",C,C,"The evidence provided indicates that intermittent dysphagia is likely caused by diffuse esophageal spasm. According to the summary from https://en.wikipedia.org/wiki/Esophageal_dysphagia, diffuse esophageal spasm is listed as a cause of intermittent dysphagia. Therefore, the correct answer should include option 'e' which corresponds to diffuse esophageal spasm. The only choice that includes 'e' is C (de).",2,10,3
+"Question: Following are radiological evidence of Achalasia cardia except not related -radiology
+Choices:
+A. Smooth narrowing of esophagus
+B. Dilated touous esophagus
+C. Absence of air in the fundus
+D. Exaggerated peristalsis
+Answer:",D,D,"The question asks for the radiological evidence that is NOT related to Achalasia cardia. According to the provided evidence from Wikipedia (https://en.wikipedia.org/wiki/Esophageal_achalasia), the typical radiological findings of Achalasia cardia include smooth narrowing of the esophagus, dilated tortuous esophagus, and absence of air in the fundus. Exaggerated peristalsis is not mentioned as a typical finding for Achalasia cardia. Therefore, option D (Exaggerated peristalsis) is the correct answer.",1,10,4

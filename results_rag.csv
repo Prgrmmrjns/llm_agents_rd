@@ -1,0 +1,124 @@
+question,original_question,reformulated_options,llm_answer,correct_answer,rationale,num_chunks_analyzed,total_chunks,index
+Which statement is TRUE about the rare disease Abetalipoproteinemia?,"Question: All are features of Abetalipoproteinemia, EXCEPT:
+Choices:
+A. Plasma levels of cholesterol and triglyceride are extremely low
+B. Manifest in early childhood with diarrhea
+C. Progressive pigmented retinopathy seen
+D. Neurological manifestation as ataxia in first decade
+Answer:","{'A': 'Plasma levels of cholesterol and triglyceride are not extremely low', 'B': 'It does not manifest in early childhood with diarrhea', 'C': 'Progressive pigmented retinopathy is absent', 'D': 'Neurological manifestation as ataxia is not seen in the first decade'}",D,D,"Option D states that 'Neurological manifestation as ataxia is not seen in the first decade.' The provided evidence does not explicitly confirm or deny the timing of ataxia, making this statement neither definitively true nor false based on the given information. However, options A ('Plasma levels of cholesterol and triglyceride are not extremely low'), B ('It does not manifest in early childhood with diarrhea'), and C ('Progressive pigmented retinopathy is absent') are all explicitly contradicted by the evidence provided. Therefore, option D is the only statement that cannot be definitively proven false based on the given evidence.",1,10,0
+Which statement is TRUE about the rare disease Abetalipoproteinemia?,"Question: Abetalipoproteinemia is due to deficiency of -
+Choices:
+A. Lecithin Cholesterol Acyl Transferase
+B. ATP Binding Cassette Transporter-1
+C. Mitochondrial Triglyceride Transfer Protein
+D. ApoCII
+Answer:","{'A': 'Abetalipoproteinemia is caused by a deficiency of Lecithin Cholesterol Acyl Transferase.', 'B': 'Abetalipoproteinemia is caused by a deficiency of ATP Binding Cassette Transporter-1.', 'C': 'Abetalipoproteinemia is caused by a deficiency of Mitochondrial Triglyceride Transfer Protein.', 'D': 'Abetalipoproteinemia is caused by a deficiency of ApoCII.'}",C,C,"Option C is correct because Abetalipoproteinemia is indeed caused by a deficiency in Mitochondrial Triglyceride Transfer Protein (MTTP). The MTTP gene mediates intracellular chylomicron or VLDL assembly and transport, and mutations in this gene are known to cause the disease. There is no evidence supporting that deficiencies in Lecithin Cholesterol Acyl Transferase (Option A), ATP Binding Cassette Transporter-1 (Option B), or ApoCII (Option D) cause Abetalipoproteinemia, making Options A, B, and D false.",1,10,1
+Which statement is TRUE about the rare disease Abetalipoproteinemia?,"Question: Small intestinal biopsy is diagnostic in :a) Whipple's diseaseb) Abetalipoproteinemiac) Celiac diseased) Agammaglobulinemia
+Choices:
+A. acd
+B. bcd
+C. abd
+D. ab
+Answer:","{'A': ""Small intestinal biopsy is NOT diagnostic for Whipple's disease, Abetalipoproteinemia and Agammaglobulinemia."", 'B': 'Small intestinal biopsy is NOT diagnostic for Abetalipoproteinemia, Celiac disease and Agammaglobulinemia.', 'C': ""Small intestinal biopsy is NOT diagnostic for Whipple's disease, Abetalipoproteinemia and Celiac disease."", 'D': 'Small intestinal biopsy is NOT diagnostic for Abetalipoproteinemia and Agammaglobulinemia.'}",C,C,"To determine which statement is true about small intestinal biopsy being diagnostic for various diseases, we need to evaluate each option based on medical evidence:
+
+Option A: Small intestinal biopsy is NOT diagnostic for Whipple's disease, Abetalipoproteinemia, and Agammaglobulinemia.
+- Evidence proving statement FALSE: Small intestinal biopsy is diagnostic in Whipple's disease (shows characteristic PAS-positive macrophages).
+
+Option B: Small intestinal biopsy is NOT diagnostic for Abetalipoproteinemia, Celiac disease, and Agammaglobulinemia.
+- Evidence proving statement FALSE: Small intestinal biopsy is diagnostic in Celiac disease (shows villous atrophy and intraepithelial lymphocytosis).
+
+Option D: Small intestinal biopsy is NOT diagnostic for Abetalipoproteinemia and Agammaglobulinemia.
+- Evidence proving statement FALSE: Small intestinal biopsy can show characteristic findings in both conditions, such as lipid accumulation in enterocytes in Abetalipoproteinemia. 
+
+Therefore, Option C states that small intestinal biopsy is NOT diagnostic for Whipple's disease, Abetalipoproteinemia, and Celiac disease.
+- Evidence proving statement TRUE: Small intestinal biopsy is not typically used to diagnose Agammaglobulinemia (it does not show characteristic findings).
+
+Hence, the correct answer is C.",1,10,2
+Which statement is TRUE about the rare disease Achalasia?,"Question: Intermittent dysphagia is caused by -a) Strictureb) Reflux esophagitisc) Achalasia cardiad) Pharyngeal diverticululame) Diffuse esophageal spasm
+Choices:
+A. ab
+B. bc
+C. de
+D. bd
+Answer:","{'A': 'Achalasia cardia causes intermittent dysphagia.', 'B': 'Reflux esophagitis does NOT cause intermittent dysphagia.', 'C': 'Pharyngeal diverticulum does NOT cause intermittent dysphagia.', 'D': 'Diffuse esophageal spasm causes intermittent dysphagia.'}",A,C,"Option A states that 'Achalasia cardia causes intermittent dysphagia.' The document describes achalasia as causing progressive dysphagia for both solids and liquids, which can be intermittent. This directly supports the statement in Option A being TRUE. There is no direct mention or evidence supporting reflux esophagitis (Option B) or pharyngeal diverticulum (Option C) causing intermittent dysphagia related to achalasia. Diffuse esophageal spasm (Option D) is not discussed in the context of achalasia, and thus there is no evidence proving it as TRUE.",1,10,3
+Which statement is TRUE about the rare disease Achalasia?,"Question: Following are radiological evidence of Achalasia cardia except not related -radiology
+Choices:
+A. Smooth narrowing of esophagus
+B. Dilated touous esophagus
+C. Absence of air in the fundus
+D. Exaggerated peristalsis
+Answer:","{'A': 'Radiological evidence does not include smooth narrowing of the esophagus.', 'B': 'Radiological evidence does not include a dilated, tortuous esophagus.', 'C': 'Radiological evidence includes the presence of air in the fundus.', 'D': 'Radiological evidence does not include exaggerated peristalsis.'}",B,D,"Option B states that radiological evidence does not include a dilated, tortuous esophagus. This statement is FALSE because achalasia cardia indeed results in a dilated and tortuous esophagus due to the failure of relaxation of the lower esophageal sphincter (LES) and loss of peristalsis. The other options are proven false by the evidence: Option A is false because radiological evidence does include smooth narrowing of the esophagus; Option C is false because the presence of air in the fundus is not a typical feature but rather the absence; Option D is false because exaggerated peristalsis is not seen in achalasia, but rather its loss.",1,10,4
+Which statement is TRUE about the rare disease Achalasia?,"Question: Which drug is used for Achalasia cardia-
+Choices:
+A. Nifedipine
+B. Propranolal
+C. Atenolol
+D. Bethnecol
+Answer:","{'A': 'Nifedipine is NOT used for treating Achalasia cardia.', 'B': 'Propranolol is NOT used for treating Achalasia cardia.', 'C': 'Atenolol is NOT used for treating Achalasia cardia.', 'D': 'Bethanechol is used for treating Achalasia cardia.'}",B,A,"The statement 'Propranolol is NOT used for treating Achalasia cardia' (Option B) is TRUE. Evidence shows that Propranolol, a non-selective beta-blocker, is not typically used to treat Achalasia. On the other hand, Nifedipine (Option A) is known to be effective in relaxing the lower esophageal sphincter and is a recognized treatment for Achalasia, making this statement FALSE. Similarly, there is no evidence supporting the use of Atenolol (a beta-blocker like Propranolol) or Bethanechol for treating Achalasia. Therefore, Options C ('Atenolol is NOT used for treating Achalasia cardia') and D ('Bethanechol is used for treating Achalasia cardia') are also FALSE.",1,10,5
+Which statement is TRUE about the rare disease Achalasia?,"Question: Achalasia is associated with increased risk of ...... malignancy:
+Choices:
+A. Squamous cell carcinoma esophagus
+B. Adenocarcinoma esophagus
+C. Bronchogenic carcinoma
+D. Bronchial adenoma
+Answer:","{'A': 'Achalasia is associated with an increased risk of squamous cell carcinoma of the esophagus.', 'B': 'Achalasia is associated with an increased risk of adenocarcinoma of the esophagus.', 'C': 'Achalasia is associated with an increased risk of bronchogenic carcinoma.', 'D': 'Achalasia is associated with an increased risk of bronchial adenoma.'}",A,A,"Option A is chosen because there is clear evidence that achalasia is associated with an increased risk of squamous cell carcinoma of the esophagus. Sources confirm a cumulative incidence of approximately 3-7% after 20 years of follow-up, proving this statement to be TRUE. Options B, C, and D are proven FALSE by the lack of direct evidence supporting their association with achalasia. While Option B mentions an increased risk of adenocarcinoma, it is noted that this risk is lower than for squamous cell carcinoma, but it does not prove the statement FALSE in a regular question context.",1,10,6
+Which statement is TRUE about the rare disease Achalasia?,"Question: Which investigation is not required in diagnosis of Achalasia?
+Choices:
+A. Esophageal manometry
+B. Barium swallow
+C. Anti-neuronal antibodies
+D. Enterocylsis
+Answer:","{'A': 'Anti-neuronal antibodies are required for the diagnosis of Achalasia.', 'B': 'Barium swallow is required for the diagnosis of Achalasia.', 'C': 'Enterocylsis is required for the diagnosis of Achalasia.', 'D': 'Esophageal manometry is required for the diagnosis of Achalasia.'}",D,D,"Option D states that 'Esophageal manometry is required for the diagnosis of Achalasia.' This is proven TRUE by the evidence which clearly indicates that esophageal manometry is a key diagnostic tool for achalasia, particularly for assessing the failure of relaxation of the lower esophageal sphincter (LES) and the loss of peristalsis in the distal esophagus. All other options are FALSE: Anti-neuronal antibodies (Option A), while often found in affected patients, are not required for diagnosis; there is no mention of barium swallow (Option B) or enteroclysis (Option C) being required diagnostic tools.",1,10,7
+Which statement is TRUE about the rare disease Achalasia?,"Question: About Achalasia Cardia: 1. Dysphagia is a presenting symptom 2. The cause is the absence of Auerbach's plexus 3. Esophagectomy is the treatment 4. Motility improving agents are used in treatment 5. Barium swallow shows irregular filling defects in lower esophagus
+Choices:
+A. 1,2,3 False & 4,5 True
+B. 1,2,4 True & 3,5 False
+C. 2,3,4 True &1,5 False
+D. 1,3,5 True & 2,4 False
+Answer:","{'A': ""Dysphagia is NOT a presenting symptom of Achalasia Cardia, the absence of Auerbach's plexus is NOT the cause, and esophagectomy is NOT the treatment. However, motility improving agents are used in treatment, and barium swallow does show irregular filling defects in lower esophagus."", 'B': ""Dysphagia is a presenting symptom of Achalasia Cardia, the absence of Auerbach's plexus is the cause, and motility improving agents are used in treatment. Esophagectomy is NOT the treatment, and barium swallow does NOT show irregular filling defects in lower esophagus."", 'C': ""The absence of Auerbach's plexus is the cause, esophagectomy is the treatment, and motility improving agents are used in treatment. Dysphagia is NOT a presenting symptom, and barium swallow does NOT show irregular filling defects in lower esophagus."", 'D': ""Dysphagia is a presenting symptom of Achalasia Cardia, esophagectomy is the treatment, and barium swallow shows irregular filling defects in lower esophagus. The absence of Auerbach's plexus is NOT the cause, and motility improving agents are NOT used in treatment.""}",B,B,"Option B states that dysphagia is a presenting symptom of Achalasia Cardia, which is true as achalasia presents with progressive difficulty swallowing both solids and liquids. It also correctly mentions that the absence of Auerbach's plexus is not the cause; instead, achalasia results from degeneration of ganglion cells in the myenteric plexus. Additionally, motility improving agents are used in treatment to help manage symptoms. The statement about esophagectomy being NOT the treatment is true since the primary treatments for achalasia include endoscopic interventions like botulinum toxin injection, pneumatic dilation, and surgical procedures such as Heller myotomy, but not esophagectomy. Lastly, barium swallow does show a characteristic bird's beak appearance of the lower esophageal sphincter rather than irregular filling defects, making this statement false. Therefore, option B is the correct choice.",1,10,8
+Which statement is TRUE about the rare disease Achalasia?,"Question: Feature of Achalasia cardia (cardiospasm) include all of the following except-
+Choices:
+A. Increasing dificulty in swallowing more for liquids than for soilds
+B. Regurgitant vomiting
+C. Dilated & turtuous esophagus
+D. Filling defect on barium study
+Answer:","{'A': 'Achalasia does not cause increasing difficulty in swallowing liquids more than solids.', 'B': 'Regurgitant vomiting is not a feature of Achalasia.', 'C': 'A non-dilated and straight esophagus is characteristic of Achalasia.', 'D': 'A filling defect on barium study is not associated with Achalasia.'}",B,D,"Option B is the correct choice because it is TRUE that regurgitant vomiting is a common feature of Achalasia. This occurs due to the failure of relaxation of the lower esophageal sphincter (LES), leading to retention of food and fluids in the esophagus, which can then regurgitate back into the mouth. The evidence proves Option A FALSE because achalasia does cause increasing difficulty in swallowing liquids more than solids. Option C is FALSE because a dilated and tortuous (sigmoid) esophagus is characteristic of long-standing achalasia, not a non-dilated and straight esophagus. Option D is FALSE because a filling defect on barium study is associated with conditions like esophageal tumors or strictures, not typically with Achalasia.",1,10,9
+Which statement is TRUE about the rare disease Achalasia?,"Question: Barret's esophagus can lead to -a) Strictureb) Reflux esophagitisc) Peptic ulcerd) Achalasia
+Choices:
+A. ac
+B. bc
+C. ad
+D. b
+Answer:","{'A': ""Achalasia can result from Barrett's esophagus"", 'B': ""Reflux esophagitis and peptic ulcer are associated with Barrett's esophagus"", 'C': ""Barrett's esophagus is a complication of Achalasia and peptic ulcer"", 'D': ""Reflux esophagitis can be caused by Barrett's esophagus""}",B,A,"Option B states that 'Reflux esophagitis and peptic ulcer are associated with Barrett's esophagus.' This statement is true. Barrett's esophagus is a known complication of chronic gastroesophageal reflux disease (GERD), which can cause reflux esophagitis. Additionally, while not directly causing peptic ulcers, GERD and the resulting inflammation can exacerbate conditions that might lead to peptic ulcer symptoms. Therefore, this option is TRUE. The other options are FALSE based on the evidence provided: Option A is false because Barrett's esophagus does not cause achalasia; Option C is false because achalasia and peptic ulcers are not complications of Barrett's esophagus; Option D is false because reflux esophagitis is a precursor to, not caused by, Barrett's esophagus.",1,10,10
+Which statement is TRUE about the rare disease Achalasia?,"Question: Odynophagia occurs ina) Achalasiab) Herpes esophagitisc) Monilial esophagitisd) Barret's oesophagus
+Choices:
+A. a
+B. c
+C. ac
+D. bc
+Answer:","{'A': 'Odynophagia is a symptom of Achalasia', 'B': 'Herpes esophagitis is associated with odynophagia, but Achalasia is not.', 'C': 'Monilial (Candidal) esophagitis can cause dysphagia but typically not odynophagia like in Achalasia.', 'D': ""Barrett's oesophagus is unrelated to odynophagia and is different from Achalasia.""}",C,D,"Option C states that 'Monilial (Candidal) esophagitis can cause dysphagia but typically not odynophagia like in Achalasia.' This statement is TRUE based on the evidence. Monilial (Candidal) esophagitis indeed causes both dysphagia and odynophagia, which aligns with symptoms of other esophageal conditions. However, it does not explicitly differentiate from Achalasia. The other options are FALSE: Option A suggests that odynophagia is a symptom of Achalasia, but while some studies indicate this, it is not typically the prominent feature; Option B incorrectly states that Herpes esophagitis is associated with odynophagia but Achalasia is not; and Option D correctly notes that Barrett's oesophagus is unrelated to odynophagia but does not mention Achalasia.",1,10,11
+Which statement is TRUE about the rare disease Achalasia?,"Question: Achalasia cardia presents with all EXCEPT:
+Choices:
+A. Increased lower esophalgus sphincter tone
+B. Normal peristalsis
+C. Dilatation proximally
+D. Malignancy
+Answer:","{'A': 'Achalasia cardia does NOT present with increased lower esophageal sphincter tone', 'B': 'Achalasia cardia presents with normal peristalsis', 'C': 'Achalasia cardia does NOT present with dilatation proximally', 'D': 'Achalasia cardia does NOT present with malignancy'}",B,B,"Option B states that 'Achalasia cardia presents with normal peristalsis.' However, according to the evidence provided, achalasia results from a loss of peristalsis in the distal esophagus. Therefore, the statement 'achalasia cardia presents with normal peristalsis' is false. This makes Option B the correct choice for an EXCEPT/NOT question.
+
+Options A, C, and D are true statements when reformulated as negatives:
+- Achalasia cardia does NOT present with increased lower esophageal sphincter tone (it actually presents with decreased LES tone).
+- Achalasia cardia does NOT present with dilatation proximally (it actually causes dilatation proximally).
+- Achalasia cardia does NOT present with malignancy (the source provided no information linking achalasia directly to malignancy, but this statement is not explicitly false based on the given evidence).",1,10,12
+Which statement is TRUE about the rare disease Achalasia?,"Question: Intermittent dysphagia is caused by -a) Strictureb) Reflux esophagitisc) Achalasia cardiad) Pharyngeal diverticulme) Diffuse esophageal spasm
+Choices:
+A. ab
+B. bc
+C. cd
+D. de
+Answer:","{'A': 'Achalasia cardia is associated with intermittent dysphagia', 'B': 'Reflux esophagitis is associated with intermittent dysphagia', 'C': 'Stricture is associated with intermittent dysphagia', 'D': 'Pharyngeal diverticulum is associated with intermittent dysphagia'}",A,D,"Achalasia cardia is associated with intermittent dysphagia. The evidence supports that achalasia results from progressive degeneration of ganglion cells in the myenteric plexus, leading to failure of relaxation of the lower esophageal sphincter (LES) and a loss of peristalsis in the distal esophagus, which causes intermittent dysphagia. Therefore, Option A is TRUE.
+
+For Option B: Reflux esophagitis typically causes symptoms like heartburn and regurgitation rather than intermittent dysphagia. Hence, it is FALSE.
+
+For Option C: Stricture usually presents with progressive, rather than intermittent, dysphagia due to narrowing of the esophagus. Hence, it is FALSE.
+
+For Option D: Pharyngeal diverticulum often causes difficulty swallowing (dysphagia) and regurgitation of undigested food but not typically intermittent dysphagia. Hence, it is FALSE.",1,10,13
