@@ -18,7 +18,7 @@ for idx in range(100):
 
 Question: {row['input']}
 
-You must choose exactly one answer from A, B, C, or D. 'None of the above' or other responses are not valid."""
+You must choose exactly one answer from A, B, C, or D."""
     response = llm_chat(prompt, 'answer')
     answer = response['chosen_answer']
     rationale = response['explanation']

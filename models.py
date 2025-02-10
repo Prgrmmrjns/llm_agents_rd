@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Set
+from typing import List, Dict
 from pydantic import BaseModel, Field
 
 class ReformulatedOptions(BaseModel):
@@ -18,12 +18,8 @@ class Answer(BaseModel):
     explanation: str = Field(..., description="Detailed explanation of the decision with evidence")
 
 class SearchKeywords(BaseModel):
-    keywords_by_option: Dict[str, List[str]] = Field(..., description="Keywords that could help prove or disprove each option")
-    general_keywords: List[str] = Field(..., description="General keywords relevant to the overall question")
-    temporal_keywords: List[str] = Field(default_factory=list, description="Time-related keywords (e.g., early onset, late stage)")
-    demographic_keywords: List[str] = Field(default_factory=list, description="Age, gender, or population-related keywords")
+    keywords: List[str] = Field(..., description="Keywords for searching evidence about the disease and statements")
 
 class ResearchSummary(BaseModel):
     evidence_by_option: Dict[str, str] = Field(..., description="Evidence supporting each answer option")
     counter_evidence_by_option: Dict[str, str] = Field(..., description="Evidence contradicting each answer option")
-    accumulated_evidence: str = Field(..., description="Accumulated evidence from previous chunks that remains relevant")
