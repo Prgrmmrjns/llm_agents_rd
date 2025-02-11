@@ -80,15 +80,6 @@ async def get_context_from_rag(query: str, disease: str, options: Dict[str, str]
     
     query_embedding = np.array(get_embedding(query))
     
-    if not chunks_dir.exists() or not embeddings_dir.exists():
-        # If no existing chunks, build new ones
-        chunks = await build_rag(query, disease)
-        if not chunks:  # If build_rag failed to get chunks
-            # Try a broader search
-            print("\nTrying broader search...")
-            chunks = await build_rag(disease, disease)
-        return chunks
-    
     # Load and rank existing chunks
     chunk_scores = []
     for emb_file in embeddings_dir.glob("embedding_*.npy"):
@@ -117,7 +108,6 @@ async def get_context_from_rag(query: str, disease: str, options: Dict[str, str]
     return [
         f"Source: {chunk['source_url']}\n{chunk['content']}\nSimilarity: {score:.3f}"
         for score, chunk in chunk_scores[:10]
-        if score > 0.5  # Only return reasonably similar chunks
     ]
 
 async def build_rag(query: str, disease: str) -> List[str]:

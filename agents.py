@@ -57,6 +57,25 @@ Output:
     b="Systemic inflammatory symptoms like fever and weight loss are NOT seen in Castleman disease.",
     c="Rapid progression to lymphoma is NOT seen in Castleman disease.",
     d="Surgical resection does NOT lead to favorable outcomes in Castleman disease."
+).model_dump_json()}
+
+Example: Multiple choice combinations
+Question: Genetic testing is diagnostic in:
+a) Marfan syndrome
+b) Ehlers-Danlos syndrome
+c) Osteogenesis imperfecta 
+d) Alport syndrome
+Choices:
+A. acd
+B. bcd
+C. abd
+D. ab
+Output:
+{ReformulatedOptions(
+    a="Marfan syndrome, Osteogenesis imperfecta, and Alport syndrome can be diagnosed using genetic testing, but Ehlers-Danlos syndrome cannot.",
+    b="Ehlers-Danlos syndrome, Osteogenesis imperfecta, and Alport syndrome can be diagnosed using genetic testing, but Marfan syndrome cannot.", 
+    c="Marfan syndrome, Ehlers-Danlos syndrome, and Alport syndrome can be diagnosed using genetic testing, but Osteogenesis imperfecta cannot.",
+    d="Only Marfan syndrome and Ehlers-Danlos syndrome can be diagnosed using genetic testing, while Osteogenesis imperfecta and Alport syndrome cannot."
 ).model_dump_json()}'''
 
     return llm_chat(prompt, "reformulated_options")
