@@ -77,6 +77,11 @@ async def main():
             # Filter out already analyzed URLs
             chunks = [c for c in chunks if c.split('\n')[0].replace('Source: ', '') not in analyzed_urls]
             
+            if not chunks:
+                print("\nNo new relevant chunks found")
+                break
+            
+            # Analyze all chunks before generating new keywords
             for chunk in chunks:
                 # Clean and process chunk
                 chunk = clean_chunk(chunk)
@@ -139,6 +144,9 @@ async def main():
                         all_disproven = False
                         continue
                 
+                if found_conclusive:
+                    break
+                
                 # Remove disproven options
                 for opt in disproven_this_round:
                     if opt in remaining_options:
@@ -149,10 +157,10 @@ async def main():
                     print_section("Validation Reset")
                     print("All options were marked as disproven - restarting analysis with all options")
                     remaining_options = {k: v for k, v in options.items()}
-                    continue
+                    break  # Break chunk loop to start fresh with new search
             
             if found_conclusive:
-                break
+                break  # Break main loop if we found conclusive evidence
         
         # Record results
         correct_answer = {0: 'A', 1: 'B', 2: 'C', 3: 'D'}.get(row['cop'], 'Unknown')
