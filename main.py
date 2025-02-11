@@ -79,7 +79,10 @@ async def main():
             
             if not chunks:
                 print("\nNo new relevant chunks found")
-                break
+                # If we've analyzed enough chunks or have only one option left, break
+                if chunks_analyzed >= 5 or len(remaining_options) == 1:
+                    break
+                continue
             
             # Analyze all chunks before generating new keywords
             for chunk in chunks:
@@ -158,9 +161,15 @@ async def main():
                     print("All options were marked as disproven - restarting analysis with all options")
                     remaining_options = {k: v for k, v in options.items()}
                     break  # Break chunk loop to start fresh with new search
+                
+                # Break if we've analyzed enough chunks without finding evidence
+                if chunks_analyzed >= 10:
+                    print("\nAnalyzed maximum number of chunks without finding conclusive evidence")
+                    break
             
-            if found_conclusive:
-                break  # Break main loop if we found conclusive evidence
+            # Break main loop if we found conclusive evidence or hit chunk limit
+            if found_conclusive or chunks_analyzed >= 10:
+                break
         
         # Record results
         correct_answer = {0: 'A', 1: 'B', 2: 'C', 3: 'D'}.get(row['cop'], 'Unknown')
