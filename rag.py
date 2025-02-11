@@ -100,11 +100,11 @@ async def get_context_from_rag(query: str, disease: str, options: Dict[str, str]
     if not chunk_scores:
         return await build_rag(query, disease)
     
-    # Return top 5 chunks instead of 10
+    # Return top chunks
     chunk_scores.sort(key=lambda x: x[0], reverse=True)
     return [
         f"Source: {chunk['source_url']}\n{chunk['content']}\nSimilarity: {score:.3f}"
-        for score, chunk in chunk_scores[:5]
+        for score, chunk in chunk_scores[:10]
     ]
 
 async def build_rag(query: str, disease: str) -> List[str]:
@@ -120,9 +120,9 @@ async def build_rag(query: str, disease: str) -> List[str]:
     for result in results:
         chunks.extend(process_chunks(result['text'], result['url'], query))
     
-    # Process and store chunks - limit to 10 chunks
+    # Process and store chunks
     formatted_chunks = []
-    for i, chunk in enumerate(chunks[:10]):
+    for i, chunk in enumerate(chunks):
         embedding = get_embedding(chunk.content)
         if len(embedding) != 1536:
             continue

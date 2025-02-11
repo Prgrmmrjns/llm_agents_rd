@@ -51,9 +51,11 @@ async def main():
         options = reformulate_options_agent(row['input'])
         options = {k: options[k.lower()] for k in 'ABCD'}
         
-        print_section(f"Reformulated Options: {query}")
+        print_separator()
+        print(f"Reformulated Options: {query}")
         for k, v in options.items():
             print(f"{k}. {v}")
+        print_separator()
         
         chunks_analyzed = 0
         final_answer = "Unclear"
@@ -62,51 +64,33 @@ async def main():
         remaining_options: Dict[str, str] = {k: v for k, v in options.items()}
         analyzed_urls = set()  # Track analyzed URLs
         
-        while remaining_options and chunks_analyzed < 10:
-            try:
-                # Get keywords for remaining options
-                if chunks_analyzed > 0:
-                    keywords = keyword_agent(remaining_options, disease)
-                    print_section("New Search Keywords")
-                    print(", ".join(keywords))
-                    
-                    search_query = f"{disease} {' '.join(keywords)}"
-                    new_chunks = await get_context_from_rag(search_query, disease, remaining_options)
-                    
-                    # Filter out already analyzed URLs
-                    new_chunks = [c for c in new_chunks if c.split('\n')[0].replace('Source: ', '') not in analyzed_urls]
-                    
-                    if not new_chunks:
-                        # Only stop if we've analyzed at least 5 chunks
-                        if chunks_analyzed >= 5:
-                            print("\nNo new relevant chunks found after analyzing 5+ chunks")
-                            break
-                        # Try broader search
-                        print("\nNo new chunks found, trying broader search...")
-                        new_chunks = await get_context_from_rag(disease, disease, remaining_options)
-                        new_chunks = [c for c in new_chunks if c.split('\n')[0].replace('Source: ', '') not in analyzed_urls]
-                        if not new_chunks:
-                            break
-                    
-                    chunk = new_chunks[0]
-                else:
-                    all_chunks = await get_context_from_rag(query, disease, options)
-                    if not all_chunks:
-                        break
-                    chunk = all_chunks[0]
-                
+        found_conclusive = False  # Flag to break out of both loops
+        while remaining_options:
+            # Get keywords
+            keywords = keyword_agent(remaining_options, disease)
+            print_section("Search Keywords")
+            print(", ".join(keywords))
+            
+            search_query = f"{disease} {' '.join(keywords)}"
+            chunks = await get_context_from_rag(search_query, disease, remaining_options)
+            
+            # Filter out already analyzed URLs
+            chunks = [c for c in chunks if c.split('\n')[0].replace('Source: ', '') not in analyzed_urls]
+            
+            for chunk in chunks:
                 # Clean and process chunk
                 chunk = clean_chunk(chunk)
                 current_source = chunk.split('\n')[0].replace('Source: ', '')
                 
                 # Skip if we've already analyzed this URL
                 if current_source in analyzed_urls:
+                    print(f"Skipping already analyzed URL: {current_source}")
                     continue
                 
                 chunks_analyzed += 1
-                print_section(f"Analyzing Chunk ({chunks_analyzed}/10)")
+                print_section(f"Analyzing Chunk {chunks_analyzed}/{len(chunks)}")
                 analyzed_urls.add(current_source)
-                print(f"Chunk length: {len(chunk)}. Chunk preview: {chunk[:500]}")
+                print(f"Chunk length: {len(chunk)}. Chunk preview: {chunk[:300]}")
                 
                 # Process options
                 all_disproven = True
@@ -120,6 +104,7 @@ async def main():
                     final_answer = last_option
                     final_evidence = {last_option: "Selected by process of elimination after analyzing multiple chunks"}
                     source_url = "Multiple sources"
+                    found_conclusive = True
                     break
                 
                 # Analyze each remaining option against current chunk
@@ -132,13 +117,14 @@ async def main():
                         )
                         
                         if valid == 'True':
-                            print(f"\n✓ Option {opt} is PROVEN TRUE")
+                            print(f"\n✓ Option {opt} PROVEN TRUE")
                             print(explanation)
                             final_answer = opt
                             final_evidence = {opt: explanation}
                             source_url = current_source
                             remaining_options.clear()
                             all_disproven = False
+                            found_conclusive = True
                             break
                         elif valid == 'False':
                             print(f"\n✗ Option {opt} DISPROVEN")
@@ -164,10 +150,9 @@ async def main():
                     print("All options were marked as disproven - restarting analysis with all options")
                     remaining_options = {k: v for k, v in options.items()}
                     continue
-                
-            except Exception as e:
-                print(f"\n! Error processing chunk: {str(e)}")
-                continue
+            
+            if found_conclusive:
+                break
         
         # Record results
         correct_answer = {0: 'A', 1: 'B', 2: 'C', 3: 'D'}.get(row['cop'], 'Unknown')
@@ -189,7 +174,7 @@ async def main():
             'evidence': final_evidence,
             'source_url': source_url,
             'num_chunks_analyzed': chunks_analyzed,
-            'total_chunks': len(all_chunks)
+            'total_chunks': len(chunks)
         })
         
         if idx % 5 == 0:
