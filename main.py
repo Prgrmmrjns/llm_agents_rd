@@ -2,6 +2,7 @@ import pandas as pd
 import asyncio
 from typing import Dict
 import re
+import random  # Add at the top with other imports
 
 from agents import (
     reformulate_options_agent,
@@ -38,7 +39,7 @@ async def main():
     df = pd.read_parquet("hf://datasets/guan-wang/ReDis-QA/data/test-00000-of-00001.parquet")
     results = []
     
-    for idx in range(100):
+    for idx in range(20):
         print_separator()
         print(f"Processing Question {idx + 1}/100\n {df.iloc[idx]['input']}")
         print_separator()
@@ -168,7 +169,16 @@ async def main():
                     break
             
             # Break main loop if we found conclusive evidence or hit chunk limit
-            if found_conclusive or chunks_analyzed >= 10:
+            if found_conclusive:
+                break
+            elif chunks_analyzed >= 10:
+                print("\nAnalyzed maximum number of chunks without finding conclusive evidence")
+                if remaining_options:
+                    # Randomly select from remaining options
+                    final_answer = random.choice(list(remaining_options.keys()))
+                    print(f"\n✓ Randomly selecting Option {final_answer} after analyzing {chunks_analyzed} chunks without conclusive evidence")
+                    final_evidence = {final_answer: "Selected randomly after analyzing maximum chunks without finding conclusive evidence"}
+                    source_url = "Multiple sources analyzed"
                 break
         
         # Record results

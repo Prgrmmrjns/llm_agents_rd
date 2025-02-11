@@ -81,7 +81,13 @@ async def get_context_from_rag(query: str, disease: str, options: Dict[str, str]
     query_embedding = np.array(get_embedding(query))
     
     if not chunks_dir.exists() or not embeddings_dir.exists():
-        return await build_rag(query, disease)
+        # If no existing chunks, build new ones
+        chunks = await build_rag(query, disease)
+        if not chunks:  # If build_rag failed to get chunks
+            # Try a broader search
+            print("\nTrying broader search...")
+            chunks = await build_rag(disease, disease)
+        return chunks
     
     # Load and rank existing chunks
     chunk_scores = []
@@ -98,13 +104,20 @@ async def get_context_from_rag(query: str, disease: str, options: Dict[str, str]
                 chunk_scores.append((similarity, chunk))
     
     if not chunk_scores:
-        return await build_rag(query, disease)
+        # If no relevant chunks found in cache, build new ones
+        chunks = await build_rag(query, disease)
+        if not chunks:  # If build_rag failed to get chunks
+            # Try a broader search
+            print("\nTrying broader search...")
+            chunks = await build_rag(disease, disease)
+        return chunks
     
     # Return top chunks
     chunk_scores.sort(key=lambda x: x[0], reverse=True)
     return [
         f"Source: {chunk['source_url']}\n{chunk['content']}\nSimilarity: {score:.3f}"
         for score, chunk in chunk_scores[:10]
+        if score > 0.5  # Only return reasonably similar chunks
     ]
 
 async def build_rag(query: str, disease: str) -> List[str]:
@@ -116,17 +129,24 @@ async def build_rag(query: str, disease: str) -> List[str]:
     
     # Get chunks from search
     results = await search_duckduckgo(f"{disease} {query}")
+    if not results:
+        # Try searching just the disease name
+        results = await search_duckduckgo(disease)
+    
     chunks = []
     for result in results:
         chunks.extend(process_chunks(result['text'], result['url'], query))
     
+    if not chunks:
+        return []
+        
     # Process and store chunks
     formatted_chunks = []
     for i, chunk in enumerate(chunks):
         embedding = get_embedding(chunk.content)
         if len(embedding) != 1536:
             continue
-        
+            
         chunk_data = {
             "content": chunk.content,
             "source_url": chunk.source_url,
