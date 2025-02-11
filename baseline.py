@@ -1,6 +1,4 @@
 import pandas as pd
-import os
-
 from llm import llm_chat
 
 # Define CSV filename

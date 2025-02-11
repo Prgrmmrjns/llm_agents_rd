@@ -1,6 +1,6 @@
 import json
 from openai import OpenAI
-from models import Answer, ResearchSummary, SearchKeywords, ReformulatedOptions
+from models import Validation, SearchKeywords, ReformulatedOptions
 
 lmstudio_model = 'mistral-small-24b-instruct-2501'
 
@@ -15,8 +15,7 @@ MODEL_NAME = 'mistral-small-24b-instruct-2501'
 def get_schema(schema_name: str):
     """Get the appropriate schema based on schema name and API type."""
     schema_map = {
-        "answer": Answer.model_json_schema(),
-        "research": ResearchSummary.model_json_schema(),
+        "validation": Validation.model_json_schema(),
         "search": SearchKeywords.model_json_schema(),
         "reformulated_options": ReformulatedOptions.model_json_schema()
     }
