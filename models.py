@@ -7,9 +7,12 @@ class ReformulatedOptions(BaseModel):
     c: str = Field(..., description="The reformulated option C")
     d: str = Field(..., description="The reformulated option D")
 
-class Validation(BaseModel):
-    valid: str = Field(..., description="True or False, indicating if the evidence/counter-evidence is valid")
-    explanation: str = Field(..., description="Detailed explanation of the decision with evidence")
+class ValidationList(BaseModel):
+    a: str = Field(..., description="Validation for option A: True / False / Unclear")
+    b: str = Field(..., description="Validation for option B: True / False / Unclear")
+    c: str = Field(..., description="Validation for option C: True / False / Unclear")
+    d: str = Field(..., description="Validation for option D: True / False / Unclear")
+    explanation: str = Field(..., description="Explanation for the validation of the options")
 
 class SearchKeywords(BaseModel):
     keywords: List[str] = Field(..., description="Keywords for searching evidence about the disease and statements")

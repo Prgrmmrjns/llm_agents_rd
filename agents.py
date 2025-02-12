@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Dict, List
 from llm import llm_chat
 from models import (
-    Validation,
+    ValidationList,
     SearchKeywords,
     ReformulatedOptions
 )
@@ -16,7 +16,7 @@ def reformulate_options_agent(query) -> dict:
     """
     prompt = f'''You are tasked with reformulating multiple choice options to make them more specific and easier to search for.
 The statement should be reformulated so that they are logically the same as before when the question is: Which statement is TRUE about the disease?     
-Note that each statement on its won should be independent of the other statements. 
+Note that each statement on its own should be independent of the other statements. 
 Sometimes the question is a negated question (e.g. containing the words "EXCEPT" or "NOT"), then the statements should be reformulated so that they are the opposite of the original statements.
 Input:
 {query}
@@ -91,129 +91,81 @@ def keyword_agent(remaining_options: Dict[str, str], rare_disease: str) -> List[
     Returns:
         List of search keywords
     """
-    prompt = f'''Generate search keywords to find evidence about {rare_disease}.
+    prompt = f'''Generate 3-5 most important search keywords to find evidence about {rare_disease}.
 REMAINING STATEMENTS TO PROVE/DISPROVE:
 {"\n".join(f"- {text}" for text in remaining_options.values())}
 
 TASK:
-Generate keywords that would help find medical texts that could conclusively prove or disprove these statements.
+Generate the most essential keywords that would help find medical texts that could conclusively prove or disprove these statements.
 Focus on:
-1. Key medical terms and symptoms mentioned
-2. Temporal or anatomical aspects (onset, progression, body parts, organ systems)
-3. Specific manifestations
-4. Technical medical terminology
+1. Most distinctive medical terms mentioned
+2. Specific manifestations or characteristics
+3. Key technical terminology
+
+Keep the list short and focused - only the most important terms.
 
 Output in JSON format matching this Pydantic model:
 {SearchKeywords(
     keywords=["keyword1", "keyword2"]
-).model_dump_json()}
-
-Example:
-Question: Which statement is TRUE about Wilson's Disease?
-Choices:
-a: "Wilson's Disease is characterized by abnormal copper accumulation in the liver leading to hepatic dysfunction."
-b: "Wilson's Disease manifests predominantly as a neurodegenerative disorder with no hepatic involvement."
-c: "Wilson's Disease typically causes neuropsychiatric symptoms due to copper deposition in the basal ganglia."
-d: "Wilson's Disease is associated with high iron levels causing cardiomyopathy."
-Output:
-{SearchKeywords(
-    keywords=["Wilson's Disease", "copper accumulation", "hepatic dysfunction", "neurodegenerative disorder", "neuropsychiatric symptoms", "copper deposition", "basal ganglia", "high iron levels", "cardiomyopathy"]
 ).model_dump_json()}'''
     
     response = llm_chat(prompt, "search")
     return response['keywords']
 
-def validation_agent(
-    statement: str, 
-    chunk: str,
-    rare_disease: str
-) -> tuple[str, str]:
+def validation_agent(statements: Dict[str, str], chunk: str, rare_disease: str) -> dict:
     """
-    Analyze if a chunk provides conclusive evidence about a statement.
+    Analyze whether a source text provides conclusive evidence for all statements simultaneously.
     
     Args:
-        statement: The statement to validate
-        chunk: The source text that contains potential evidence
-        rare_disease: Name of the rare disease
+        statements: Dictionary of statements for options (keys should be uppercase letters, e.g., 'A')
+        chunk: The source text chunk that may contain evidence.
+        rare_disease: Name of the rare disease.
     
     Returns:
-        Tuple of (validation_result, explanation) where validation_result is:
-        - 'True' if chunk conclusively proves the statement
-        - 'False' if chunk conclusively disproves the statement
-        - 'Unclear' if evidence is inconclusive
+        A dictionary matching the ValidationList schema with keys 'a', 'b', 'c', 'd', and 'explanation'.
     """
+    # Ensure all four options appear in the prompt. For any missing one, supply a filler.
+    complete_options = {}
+    for letter in "abcd":
+        key_upper = letter.upper()
+        if key_upper in statements:
+            complete_options[letter] = statements[key_upper]
+        else:
+            complete_options[letter] = "Eliminated or not applicable"
+            
+    statements_text = "\n".join(f"{letter.upper()}. {text}" for letter, text in complete_options.items())
     
-    prompt = f'''You are tasked with analyzing whether a source text provides CONCLUSIVE evidence about a statement regarding {rare_disease}.
-STATEMENT
-{statement}
+    prompt = f'''You are tasked with analyzing whether a source text provides CONCLUSIVE evidence about the following statements regarding the rare disease {rare_disease}:
+{statements_text}
 
-SOURCE TEXT
+SOURCE TEXT:
 {chunk}
 
 IMPORTANT RULES:
-- Mark as 'False' if the source EXPLICITLY CONTRADICTS the statement
-- Mark as 'True' if the source EXPLICITLY CONFIRMS the statement
-- Mark as 'Unclear' if the source does not provide any information about the statement
-
+For each statement:
+- Mark as 'True' if the source explicitly confirms the statement.
+- Mark as 'False' if the source explicitly contradicts the statement.
+- Mark as 'Unclear' if the source does not provide sufficient information about the statement.
+- Note that only one statement is true while three options are false.
+- Do not mark all options as 'False' or two or more options as 'True'.
 Output in JSON format matching this Pydantic model:
-{Validation(
-    valid='True / False / Unclear',  
-    explanation="""1. Relevant information found: quote specific parts from source
-2. Logical connection: explain how the information relates to the statement
-3. Alternative interpretations: consider other possible interpretations
-4. Conclusion: explain why this proves/disproves the statement or why it's unclear"""
+{ValidationList(
+    a="True / False / Unclear for option A",
+    b="True / False / Unclear for option B",
+    c="True / False / Unclear for option C",
+    d="True / False / Unclear for option D",
+    explanation="Explanation for the validation of the options"
 ).model_dump_json()}
 
-Example - Evidence for True:
-
-Question: Which statement is TRUE about Gaucher Disease?
-STATEMENT
-Gaucher Disease is characterized by a deficiency of glucocerebrosidase leading to accumulation of glucocerebroside in macrophages.
-
-SOURCE TEXT
-Gaucher Disease, a lysosomal storage disorder, results from mutations that reduce the enzyme activity of glucocerebrosidase.
-The deficiency causes glucocerebroside to accumulate within macrophages, which is the pathological hallmark of the disease.
-This accumulation is responsible for clinical features such as hepatosplenomegaly and bone pain.
+Example:
+Question: Which statement is TRUE about Example Disease?
+SOURCE TEXT: "Example disease displays symptom X, Y, and Z, but symptom Q is rarely observed."
 Output:
-{Validation(
-    valid='True',
-    explanation="""1. Relevant information found: 'The deficiency causes glucocerebroside to accumulate within macrophages, which is the pathological hallmark of the disease.'
-2. Logical connection: The enzyme deficiency in Gaucher Disease leads to the accumulation of glucocerebroside in macrophages, supporting the statement.
-3. Alternative interpretations: There is no alternative interpretation of the source text.
-4. Conclusion: The source text provides conclusive evidence that Gaucher Disease is characterized by a deficiency of glucocerebrosidase leading to accumulation of glucocerebroside in macrophages."""
-).model_dump_json()}
-
-Example - Evidence for False:
-Question: Which statement is TRUE about Fabry Disease?
-STATEMENT
-Fabry Disease is characterized by a deficiency of beta-galactosidase leading to accumulation of ceramide.
-
-SOURCE TEXT
-Fabry Disease is an X-linked lysosomal storage disorder caused by a deficiency of alpha-galactosidase A. This enzymatic defect results in the accumulation of globotriaosylceramide in various tissues, leading to a range of clinical manifestations including neuropathic pain, renal dysfunction, and cardiac involvement.
-Output:
-{Validation(
-    valid='False',
-    explanation="""1. Relevant information found: The source text clearly states that Fabry Disease is due to a deficiency of alpha-galactosidase A, and the accumulated substrate is globotriaosylceramide.
-2. Logical connection: The statement incorrectly cites beta-galactosidase and ceramide, directly contradicting the reliable source.
-3. Alternative interpretations: There is no ambiguity; the enzyme and substrate are unequivocally different.
-4. Conclusion: The evidence disproves the statement, confirming it as 'False'."""
-).model_dump_json()}
-
-Example - Evidence for Unclear:
-Question: Which statement is TRUE about Langerhans Cell Histiocytosis?
-STATEMENT
-Langerhans Cell Histiocytosis is characterized by the presence of Birbeck granules in all cases.
-
-SOURCE TEXT
-Langerhans Cell Histiocytosis is diagnosed through a combination of histopathological, immunohistochemical, and clinical findings. While the identification of Birbeck granules via electron microscopy is a recognized diagnostic feature when present, it is also documented that not every case exhibits these granules despite other supportive diagnostic criteria.
-Output:
-{Validation(
-    valid='Unclear',
-    explanation="""1. Relevant information found: The source text indicates that Birbeck granules can be observed in Langerhans Cell Histiocytosis but also emphasizes that their absence does not exclude the disease.
-2. Logical connection: The absolute claim in the statement ('in all cases') is at odds with the conditional nature described in the source text.
-3. Alternative interpretations: While Birbeck granules are a significant diagnostic marker when present, they are not universally observed, leaving room for ambiguity.
-4. Conclusion: The evidence does not conclusively support the statement, resulting in an 'Unclear' validity."""
-).model_dump_json()}'''
-    
-    response = llm_chat(prompt, "validation")
-    return response['valid'], response['explanation']
+{{"explanation": "Option A is supported by the source; Option C is contradicted by the evidence; Options B and D remain inconclusive.",
+"a": "True",
+"b": "Unclear",
+"c": "False",
+"d": "Unclear"}}'''
+    response = llm_chat(prompt, "validation_list")
+    explanation, a, b, c, d = response['explanation'], response['a'], response['b'], response['c'], response['d']
+    return explanation, a, b, c, d
