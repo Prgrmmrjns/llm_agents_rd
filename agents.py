@@ -3,7 +3,6 @@ from typing import Dict, List
 from llm import llm_chat
 from models import (
     ValidationList,
-    SearchKeywords,
     ReformulatedOptions
 )
 
@@ -18,6 +17,13 @@ def reformulate_options_agent(query) -> dict:
 The statement should be reformulated so that they are logically the same as before when the question is: Which statement is TRUE about the disease?     
 Note that each statement on its own should be independent of the other statements. 
 Sometimes the question is a negated question (e.g. containing the words "EXCEPT" or "NOT"), then the statements should be reformulated so that they are the opposite of the original statements.
+Also list the area(s) of the disease that the question falls into. Choose from the following areas:
+- Functional consequences
+- Genes
+- Natural History
+- Phenotype
+- Prevalence
+
 Input:
 {query}
 
@@ -26,7 +32,8 @@ Output in JSON format with these fields:
     a="Reformulated option A",
     b="Reformulated option B",
     c="Reformulated option C",
-    d="Reformulated option D"
+    d="Reformulated option D",
+    keywords=[]
 ).model_dump_json()}
 
 Example: Normal question
@@ -41,7 +48,8 @@ Output:
     a="Presence of multiple, bluish, compressible skin lesions is seen in Blue Rubber Bleb Nevus Syndrome.",
     b="Occurrence of hemangioma-like lesions in the gastrointestinal tract is seen in Blue Rubber Bleb Nevus Syndrome.",
     c="Recurrent episodes of bleeding from the lesions is seen in Blue Rubber Bleb Nevus Syndrome.",
-    d="Severe inflammatory joint pain is seen in Blue Rubber Bleb Nevus Syndrome."
+    d="Severe inflammatory joint pain is seen in Blue Rubber Bleb Nevus Syndrome.",
+    keywords=["Blue Rubber Bleb Nevus Syndrome", "Inflammatory joint pain", "Skin lesions", "Gastrointestinal tract", "Bleeding"]
 ).model_dump_json()}
 
 Example: Negated question
@@ -56,7 +64,8 @@ Output:
     a="Unicentric lymphadenopathy with hyaline vascular changes is NOT seen in Castleman disease.",
     b="Systemic inflammatory symptoms like fever and weight loss are NOT seen in Castleman disease.",
     c="Rapid progression to lymphoma is NOT seen in Castleman disease.",
-    d="Surgical resection does NOT lead to favorable outcomes in Castleman disease."
+    d="Surgical resection does NOT lead to favorable outcomes in Castleman disease.",
+    keywords=["Unicentric lymphadenopathy with hyaline vascular changes", "Systemic inflammatory symptoms", "Rapid progression to lymphoma", "Surgical resection"]
 ).model_dump_json()}
 
 Example: Multiple choice combinations
@@ -75,42 +84,11 @@ Output:
     a="Marfan syndrome, Osteogenesis imperfecta, and Alport syndrome can be diagnosed using genetic testing, but Ehlers-Danlos syndrome cannot.",
     b="Ehlers-Danlos syndrome, Osteogenesis imperfecta, and Alport syndrome can be diagnosed using genetic testing, but Marfan syndrome cannot.", 
     c="Marfan syndrome, Ehlers-Danlos syndrome, and Alport syndrome can be diagnosed using genetic testing, but Osteogenesis imperfecta cannot.",
-    d="Only Marfan syndrome and Ehlers-Danlos syndrome can be diagnosed using genetic testing, while Osteogenesis imperfecta and Alport syndrome cannot."
+    d="Only Marfan syndrome and Ehlers-Danlos syndrome can be diagnosed using genetic testing, while Osteogenesis imperfecta and Alport syndrome cannot.",
+    keywords=["Marfan syndrome", "Ehlers-Danlos syndrome", "Osteogenesis imperfecta", "Alport syndrome", "Genetic testing"]
 ).model_dump_json()}'''
 
     return llm_chat(prompt, "reformulated_options")
-
-def keyword_agent(remaining_options: Dict[str, str], rare_disease: str) -> List[str]:
-    """
-    Generate targeted search keywords based on remaining options.
-    
-    Args:
-        remaining_options: Dictionary of options still under consideration
-        rare_disease: Name of the rare disease
-    
-    Returns:
-        List of search keywords
-    """
-    prompt = f'''Generate 3-5 most important search keywords to find evidence about {rare_disease}.
-REMAINING STATEMENTS TO PROVE/DISPROVE:
-{"\n".join(f"- {text}" for text in remaining_options.values())}
-
-TASK:
-Generate the most essential keywords that would help find medical texts that could conclusively prove or disprove these statements.
-Focus on:
-1. Most distinctive medical terms mentioned
-2. Specific manifestations or characteristics
-3. Key technical terminology
-
-Keep the list short and focused - only the most important terms.
-
-Output in JSON format matching this Pydantic model:
-{SearchKeywords(
-    keywords=["keyword1", "keyword2"]
-).model_dump_json()}'''
-    
-    response = llm_chat(prompt, "search")
-    return response['keywords']
 
 def validation_agent(statements: Dict[str, str], chunk: str, rare_disease: str) -> dict:
     """
@@ -130,15 +108,13 @@ def validation_agent(statements: Dict[str, str], chunk: str, rare_disease: str) 
         key_upper = letter.upper()
         if key_upper in statements:
             complete_options[letter] = statements[key_upper]
-        else:
-            complete_options[letter] = "Eliminated or not applicable"
             
     statements_text = "\n".join(f"{letter.upper()}. {text}" for letter, text in complete_options.items())
     
     prompt = f'''You are tasked with analyzing whether a source text provides CONCLUSIVE evidence about the following statements regarding the rare disease {rare_disease}:
 {statements_text}
 
-SOURCE TEXT:
+SOURCE:
 {chunk}
 
 IMPORTANT RULES:
@@ -155,17 +131,7 @@ Output in JSON format matching this Pydantic model:
     c="True / False / Unclear for option C",
     d="True / False / Unclear for option D",
     explanation="Explanation for the validation of the options"
-).model_dump_json()}
-
-Example:
-Question: Which statement is TRUE about Example Disease?
-SOURCE TEXT: "Example disease displays symptom X, Y, and Z, but symptom Q is rarely observed."
-Output:
-{{"explanation": "Option A is supported by the source; Option C is contradicted by the evidence; Options B and D remain inconclusive.",
-"a": "True",
-"b": "Unclear",
-"c": "False",
-"d": "Unclear"}}'''
+).model_dump_json()}'''
     response = llm_chat(prompt, "validation_list")
     explanation, a, b, c, d = response['explanation'], response['a'], response['b'], response['c'], response['d']
     return explanation, a, b, c, d

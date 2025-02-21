@@ -1,8 +1,7 @@
 import asyncio
 from pathlib import Path
-from typing import List, Dict, Any, Iterator
+from typing import List, Dict, Any, Iterator, Optional
 from dataclasses import dataclass
-from duckduckgo_search import DDGS
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 from bs4 import BeautifulSoup
 import requests
@@ -26,45 +25,84 @@ try:
 except LookupError:
     nltk.download('punkt')
 
+# Add this configuration section after the initial constants
+FINDZEBRA_API_URL = "https://www.findzebra.com/api/v1/query"
+FINDZEBRA_API_KEY = "c6213a1c-1092-4eb8-92a6-564b7068925e"  # Replace with your actual API key
+
 @dataclass
 class TextChunk:
     content: str
     source_url: str
     query: str = ''
 
-async def crawl_parallel(urls: List[str]) -> List[Dict[str, Any]]:
-    """Fast parallel crawling of URLs."""
+async def crawl_parallel(urls: List[str], max_concurrent: int = 5) -> List[Dict[str, str]]:
+    """Crawl multiple URLs in parallel with a concurrency limit."""
     browser_config = BrowserConfig(
         headless=True,
         verbose=False,
-        extra_args=["--disable-gpu", "--disable-javascript", "--disable-images"]
+        extra_args=["--disable-gpu", "--disable-dev-shm-usage", "--no-sandbox"],
     )
-    
+    crawl_config = CrawlerRunConfig(cache_mode=CacheMode.BYPASS)
     results = []
-    async with AsyncWebCrawler(config=browser_config) as crawler:
-        tasks = [crawler.arun(
-            url=url, 
-            config=CrawlerRunConfig(cache_mode=CacheMode.BYPASS, page_timeout=10000),
-            session_id=f"s_{i}"
-        ) for i, url in enumerate(urls)]
-        
-        responses = await asyncio.gather(*tasks, return_exceptions=True)
-        results = [
-            {'text': r.markdown, 'url': url} 
-            for url, r in zip(urls, responses)
-            if not isinstance(r, Exception) and r.success
-        ]
-    
-    return results
 
-async def search_duckduckgo(query: str) -> List[Dict[str, str]]:
-    """Search DuckDuckGo and crawl results."""
-    with DDGS() as ddgs:
-        results = list(ddgs.text(query, max_results=3))
-        urls = [r.get('link') or r.get('url') or r.get('href', '') 
-                for r in results 
-                if (r.get('link') or r.get('url') or r.get('href', '')).startswith(('http://', 'https://'))][:3]
-        return await crawl_parallel(urls) if urls else []
+    # Create the crawler instance
+    crawler = AsyncWebCrawler(config=browser_config)
+    await crawler.start()
+
+    try:
+        # Create a semaphore to limit concurrency
+        semaphore = asyncio.Semaphore(max_concurrent)
+        
+        async def process_url(url: str):
+            async with semaphore:
+                result = await crawler.arun(
+                    url=url,
+                    config=crawl_config,
+                    session_id="session1"
+                )
+                if result.success:
+                    print(f"Successfully crawled: {url}")
+                    results.append({
+                        'text': result.markdown_v2.raw_markdown,
+                        'url': url
+                    })
+                else:
+                    print(f"Failed: {url} - Error: {result.error_message}")
+        
+        # Process all URLs in parallel with limited concurrency
+        await asyncio.gather(*[process_url(url) for url in urls])
+        return results
+    finally:
+        await crawler.close()
+
+async def search_findzebra(query: str, max_results: int = 3) -> List[Dict[str, Any]]:
+    """Search FindZebra API and return results."""
+    params = {
+        "api_key": FINDZEBRA_API_KEY,
+        "q": query,
+        "response_format": "json",
+        "rows": max_results,
+        "fl": "title,display_content,source_url,genes,source"
+    }
+    
+    try:
+        response = requests.get(FINDZEBRA_API_URL, params=params)
+        response.raise_for_status()
+        results = response.json()
+        
+        # Transform the results into the expected format
+        processed_results = []
+        for result in results.get("response", {}).get("docs", []):
+            processed_results.append({
+                'text': f"{result.get('title', '')}\n\n{result.get('display_content', '')}",
+                'url': result.get('source_url', ''),
+                'genes': result.get('genes', []),
+                'source': result.get('source', '')
+            })
+        return processed_results
+    except Exception as e:
+        print(f"FindZebra API error: {str(e)}")
+        return []
 
 def process_chunks(text: str, url: str, query: str = '') -> List[TextChunk]:
     """Split text into chunks."""
@@ -118,8 +156,8 @@ def group_sentences_by_similarity(sentences: List[str],
     if current_chunk:
         yield current_chunk
 
-def chunk_text(text: str, min_size: int = 2000, max_size: int = 5000) -> List[str]:
-    """Split text into coherent chunks between min_size and max_size characters."""
+def chunk_text(text: str, max_size: int = 2000) -> List[str]:
+    """Split text into coherent chunks up to max_size characters."""
     # Clean text first
     text = clean_text(text)
     
@@ -131,9 +169,9 @@ def chunk_text(text: str, min_size: int = 2000, max_size: int = 5000) -> List[st
     current_size = 0
     
     for paragraph in paragraphs:
-        # If adding this paragraph would exceed max_size and we're above min_size,
+        # If adding this paragraph would exceed max_size,
         # start a new chunk
-        if current_size + len(paragraph) > max_size and current_size >= min_size:
+        if current_size + len(paragraph) > max_size:
             chunks.append(' '.join(current_chunk))
             current_chunk = []
             current_size = 0
@@ -150,7 +188,7 @@ def chunk_text(text: str, min_size: int = 2000, max_size: int = 5000) -> List[st
     # Add any remaining content
     if current_chunk:
         # If the last chunk is too small, merge it with the previous chunk
-        if len(chunks) > 0 and current_size < min_size:
+        if len(chunks) > 0:
             last_chunk = chunks.pop()
             merged = last_chunk + ' ' + ' '.join(current_chunk)
             chunks.append(merged)
@@ -160,33 +198,26 @@ def chunk_text(text: str, min_size: int = 2000, max_size: int = 5000) -> List[st
     return chunks
 
 async def fetch_and_parse_url(url: str, max_chunks_per_source: int = 5) -> List[str]:
-    """Fetch URL content and split into chunks."""
+    """Fetch URL content and split into chunks using Crawl4AI."""
     try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124'}
-        response = requests.get(url, timeout=10, headers=headers)
-        response.raise_for_status()
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Remove non-content elements
-        for element in soup(["script", "style", "nav", "header", "footer", "aside"]):
-            element.decompose()
-        
-        # Get main content
-        content_tags = soup.find_all(['article', 'main', 'div'], 
-                                   class_=lambda x: x and any(word in str(x).lower() 
-                                   for word in ['content', 'article', 'main', 'text']))
-        
-        text = ' '.join(tag.get_text() for tag in content_tags) if content_tags else soup.get_text()
-        text = clean_text(text)
-        
-        if not text.strip():
-            return []
-        
-        # Create larger chunks
-        chunks = chunk_text(text, min_size=2000, max_size=8000)[:max_chunks_per_source]
-        return [f"Source: {url}\n{chunk}" for chunk in chunks]
-        
+        # Create an instance of AsyncWebCrawler
+        async with AsyncWebCrawler() as crawler:
+            # Run the crawler on the URL
+            result = await crawler.arun(url=url)
+            
+            if not result.success:
+                print(f"Failed to crawl {url}")
+                return []
+            
+            # Get the markdown content
+            text = result.markdown
+            if not text.strip():
+                return []
+            
+            # Create larger chunks
+            chunks = chunk_text(text, max_size=2000)[:max_chunks_per_source]
+            return [f"Source: {url}\n{chunk}" for chunk in chunks]
+            
     except Exception as e:
         print(f"Error processing {url}: {str(e)}")
         return []
@@ -214,38 +245,38 @@ def rank_chunks_by_similarity(chunks: List[str], keywords: List[str]) -> List[st
     return [chunk for _, chunk in ranked_pairs]
 
 async def build_rag(keywords: List[str], disease: str, max_results: int = 3) -> List[str]:
-    """Build RAG context from search results."""
+    """Build RAG context from FindZebra search results."""
     query = " ".join([disease] + keywords[:3])
     
     try:
-        with DDGS() as ddgs:
-            search_results = list(ddgs.text(query, max_results=10))
+        # Search FindZebra
+        search_results = await search_findzebra(query, max_results=max_results)
+        
+        if not search_results:
+            return []
+        
+        # Get URLs to crawl
+        urls = [result['url'] for result in search_results]
+        
+        # Crawl URLs in parallel
+        crawled_results = await crawl_parallel(urls)
+        
+        # Process each result into chunks
+        all_chunks = []
+        for result in crawled_results:
+            text = clean_text(result['text'])
+            chunks = chunk_text(text, max_size=2000)
             
-            # Get unique domains
-            unique_urls = set()
-            for result in search_results:
-                url = (result.get('link') or result.get('url') or 
-                      result.get('href') or result.get('source'))
-                
-                if url and url.startswith(('http://', 'https://')):
-                    domain = '/'.join(url.split('/')[:3])
-                    if domain not in ['/'.join(u.split('/')[:3]) for u in unique_urls]:
-                        unique_urls.add(url)
-                        if len(unique_urls) >= max_results:
-                            break
-            
-            if not unique_urls:
-                return []
-            
-            # Fetch and parse URLs concurrently
-            tasks = [fetch_and_parse_url(url) for url in unique_urls]
-            chunks_list = await asyncio.gather(*tasks)
-            
-            # After getting chunks, rank them by similarity
-            all_chunks = [chunk for chunks in chunks_list for chunk in chunks]
-            ranked_chunks = rank_chunks_by_similarity(all_chunks, [disease] + keywords)
-            
-            return ranked_chunks
+            # Add source information to each chunk
+            source_chunks = [
+                f"Source: {result['url']}\n{chunk}" 
+                for chunk in chunks
+            ]
+            all_chunks.extend(source_chunks)
+        
+        # Rank chunks by similarity
+        ranked_chunks = rank_chunks_by_similarity(all_chunks, [disease] + keywords)
+        return ranked_chunks
             
     except Exception as e:
         print(f"Search error: {str(e)}")
